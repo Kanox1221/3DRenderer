@@ -24,6 +24,12 @@ int main(int argc, char const *argv[])
     /* Make the window's context current */
     glfwMakeContextCurrent(window);
 
+	if (!gladLoadGLLoader((GLADloadproc) glfwGetProcAddress)) {
+        glfwTerminate();
+		std::cerr << "GLAD couldn't start" << std::endl;
+		return -1;
+	}
+
     /* Loop until the user closes the window */
     while(!glfwWindowShouldClose(window)){
         /* Render here */
@@ -36,7 +42,7 @@ int main(int argc, char const *argv[])
         glfwPollEvents();
     }
 
-    glfwPollEvents();
+    glfwTerminate();
 
     return 0;
 }
