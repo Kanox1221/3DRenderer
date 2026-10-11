@@ -24,6 +24,9 @@ void renderer_init (GLFWwindow* window)
          0.0f,  0.5f, 0.0f,
     };
 
+    // ======================================================================
+    // ============================ VBO & VAO ===============================
+    // ======================================================================
     /* KNX : Create VBO */
     unsigned int VBO;
     glGenBuffers(1, &VBO);
@@ -33,6 +36,17 @@ void renderer_init (GLFWwindow* window)
 
     /* KNX : Copy the vertex data to buffer's memory */
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+    /* KNX : Create VAO */
+    unsigned int VAO;
+    glGenVertexArrays(1, &VAO);
+    glBindVertexArray(VAO);
+
+    /* KNX : VAO setting */
+    unsigned int stride = 3 * sizeof(float);
+    // Location = 0 / # of vertices / Type of data / Data to be normalized / Stride / Offset
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride, (void*) 0); 
+    glEnableVertexAttribArray(0);
 
     // ======================================================================
     // =============================== Shader ===============================
@@ -102,6 +116,14 @@ void renderer_init (GLFWwindow* window)
     } else {
         std::cout << "[INFO] Shader Program Linked Successfully" << std::endl;
     }
+
+    /* KNX : Activate the program*/
+    glUseProgram(shaderProgram);
+    
+    /* KNX : Delete shader after link
+            Program already drawn the result when the link is successful*/
+    glDeleteShader(vertexShader);
+    glDeleteShader(fragmentShader);
 }
 
 int main(int argc, char const *argv[])
@@ -157,6 +179,9 @@ int main(int argc, char const *argv[])
         /* Render here */
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
+
+        /* KNX : Draw triangle */
+        glDrawArrays(GL_TRIANGLES, 0, 3);
 
         /* Swap front and back buffers */
         glfwSwapBuffers(window);
