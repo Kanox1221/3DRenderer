@@ -2,6 +2,10 @@
 #include "readShaderFile.hpp"
 #include "assert.h"
 
+// GLM include
+#include <glm.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
 const int WINDOW_WIDTH = 1920;
 const int WINDOW_HEIGHT = 1080;
 
@@ -124,6 +128,25 @@ void renderer_init (GLFWwindow* window)
             Program already drawn the result when the link is successful*/
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
+
+    // ======================================================================
+    // ===================== Model & View & Projection ======================
+    // ======================================================================
+    /* KNX : Make mat4 for MVP */
+    glm::mat4 model = glm::mat4(1.0f);
+    glm::mat4 view = glm::mat4(1.0f);
+    glm::mat4 projection = glm::mat4(1.0f);
+    
+    /* KNX : Send matrices to shader */
+    int modelLoc = glGetUniformLocation(shaderProgram, "model");
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+
+    int viewLoc = glGetUniformLocation(shaderProgram, "view");
+    glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+
+    int projLoc = glGetUniformLocation(shaderProgram, "projection");
+    glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
+
 }
 
 int main(int argc, char const *argv[])
