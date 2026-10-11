@@ -7,6 +7,7 @@ find_package(OpenGL REQUIRED)
 add_executable(Renderer
     src/main.cpp
     external/glad/glad.c
+    src/readShaderFile.cpp
 )
 
 target_include_directories(Renderer PRIVATE external external/glfw/include)
@@ -19,3 +20,4 @@ target_link_libraries(Renderer PRIVATE opengl32)
 set_property(TARGET Renderer PROPERTY MSVC_RUNTIME_LIBRARY MultiThreadedDLL)
 
 target_compile_features(Renderer PRIVATE cxx_std_17)
+target_compile_definitions(Renderer PRIVATE PROJECT_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}")

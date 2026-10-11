@@ -1,4 +1,5 @@
 #include "config.h"
+#include "readShaderFile.hpp"
 
 const int WINDOW_WIDTH = 1920;
 const int WINDOW_HEIGHT = 1080;
@@ -29,8 +30,12 @@ void renderer_init (GLFWwindow* window)
     /* KNX : Set given VBO as GL_ARRAY_BUFFER */
     glBindBuffer(GL_ARRAY_BUFFER, VBO);     // GL_ARRAY_BUFFER = Buffer that stores vertex
 
-    /* KNX : Copy the vertex data to buffer's memory*/
+    /* KNX : Copy the vertex data to buffer's memory */
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+    /* KNX : Read our shader file */
+    std::string vertexShaderSource = readShaderFile(std::string(PROJECT_SOURCE_DIR) + "/shaders/triangle.vs.glsl");
+    const char* vertexShaderSource_c = vertexShaderSource.c_str();
 }
 
 int main(int argc, char const *argv[])
@@ -40,7 +45,7 @@ int main(int argc, char const *argv[])
 
     /* Initialize the library */
     if(!glfwInit()){
-        std::cerr << "GLFW : GLFW couldn't start" << std::endl;
+        std::cerr << "[ERROR] GLFW : GLFW couldn't start" << std::endl;
         return -1;
     }
     /* KNX : Configure GLFW*/
@@ -52,12 +57,12 @@ int main(int argc, char const *argv[])
     window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "3D Renderer", NULL, NULL);
 
     if(!window){
-        std::cerr << "GLFW : Failed to create GLFW window" << std::endl;
+        std::cerr << "[ERROR] GLFW : Failed to create GLFW window" << std::endl;
         glfwTerminate();
         return EXIT_FAILURE;
     }
 
-    std::cout << "GLFW : Window Opened" << std::endl;
+    std::cout << "[INFO] GLFW : Window Opened" << std::endl;
 
     /* Make the window's context current */
     glfwMakeContextCurrent(window);
@@ -65,7 +70,7 @@ int main(int argc, char const *argv[])
     /* Load OpenGL functions through GLAD*/
 	if (!gladLoadGLLoader((GLADloadproc) glfwGetProcAddress)) {
         glfwTerminate();
-		std::cerr << "GLAD : Failed to initialize GLAD" << std::endl;
+		std::cerr << "[ERROR] GLAD : Failed to initialize GLAD" << std::endl;
 		return EXIT_FAILURE;
 	}
 
