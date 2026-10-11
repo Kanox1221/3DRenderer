@@ -6,7 +6,7 @@ find_package(OpenGL REQUIRED)
 
 add_executable(Renderer
     src/main.cpp
-    src/glad.c
+    external/glad/glad.c
 )
 
 target_include_directories(Renderer PRIVATE external external/glfw/include)
