@@ -1,5 +1,6 @@
 #include "config.h"
 #include "readShaderFile.hpp"
+#include "assert.h"
 
 const int WINDOW_WIDTH = 1920;
 const int WINDOW_HEIGHT = 1080;
@@ -33,9 +34,34 @@ void renderer_init (GLFWwindow* window)
     /* KNX : Copy the vertex data to buffer's memory */
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
+    // ======================================================================
+    // =============================== Shader ===============================
+    // ======================================================================
     /* KNX : Read our shader file */
     std::string vertexShaderSource = readShaderFile(std::string(PROJECT_SOURCE_DIR) + "/shaders/triangle.vs.glsl");
     const char* vertexShaderSource_c = vertexShaderSource.c_str();
+
+    /* KNX : Create and compile vertex shader*/
+    unsigned int vertexShader;      // Vertex shader ID
+    vertexShader = glCreateShader(GL_VERTEX_SHADER);
+    glShaderSource(vertexShader, 1, &vertexShaderSource_c, NULL);
+    glCompileShader(vertexShader);
+
+    /* KNX : Error control for shaders */
+    GLint vs_compile_result;
+    glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &vs_compile_result);
+    if (vs_compile_result != GL_TRUE){
+        std::cerr << "[ERROR] Vertex Shader Compiler Error" << std::endl;
+
+        char errBuff[1024];
+        int bufLen;
+        glGetShaderInfoLog(vertexShader, 1024, &bufLen, errBuff);
+        std::cout << "Vertex Shader Info : " << errBuff << std::endl;
+        assert(bufLen == 0);
+    } else {
+        std::cout << "[INFO] Vertex Shader Compiled Successfully" << std::endl;
+    }
+
 }
 
 int main(int argc, char const *argv[])
