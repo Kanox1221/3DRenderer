@@ -3,6 +3,17 @@
 const int WINDOW_WIDTH = 1920;
 const int WINDOW_HEIGHT = 1080;
 
+void framebuffer_size_callback(GLFWwindow* window, int width, int height)
+{
+    glViewport(0, 0, width, height);
+}
+
+void processInput (GLFWwindow* window)
+{
+    if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) 
+        glfwSetWindowShouldClose(window, true);
+}
+
 int main(int argc, char const *argv[])
 {
     /* GLFW Window Initial Setup: https://www.glfw.org/documentation.html */
@@ -47,6 +58,9 @@ int main(int argc, char const *argv[])
 
     /* Loop until the user closes the window */
     while(!glfwWindowShouldClose(window)){
+        /* KNX : Process User Input */
+        processInput(window);
+
         /* Render here */
         glClear(GL_COLOR_BUFFER_BIT);
 
@@ -60,8 +74,4 @@ int main(int argc, char const *argv[])
     glfwTerminate();
 
     return EXIT_SUCCESS;
-}
-
-void framebuffer_size_callback(GLFWwindow* window, int width, int height){
-    glViewport(0, 0, width, height);
 }
