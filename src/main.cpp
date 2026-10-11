@@ -37,7 +37,7 @@ void renderer_init (GLFWwindow* window)
     // ======================================================================
     // =============================== Shader ===============================
     // ======================================================================
-    /* KNX : Read our shader file */
+    /* KNX : Read our vertex shader file */
     std::string vertexShaderSource = readShaderFile(std::string(PROJECT_SOURCE_DIR) + "/shaders/triangle.vs.glsl");
     const char* vertexShaderSource_c = vertexShaderSource.c_str();
 
@@ -47,7 +47,7 @@ void renderer_init (GLFWwindow* window)
     glShaderSource(vertexShader, 1, &vertexShaderSource_c, NULL);
     glCompileShader(vertexShader);
 
-    /* KNX : Error control for shaders */
+    /* KNX : Error control for vertex shaders */
     GLint vs_compile_result;
     glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &vs_compile_result);
     if (vs_compile_result != GL_TRUE){
@@ -57,11 +57,31 @@ void renderer_init (GLFWwindow* window)
         int bufLen;
         glGetShaderInfoLog(vertexShader, 1024, &bufLen, errBuff);
         std::cout << "Vertex Shader Info : " << errBuff << std::endl;
-        assert(bufLen == 0);
     } else {
         std::cout << "[INFO] Vertex Shader Compiled Successfully" << std::endl;
     }
 
+    /* KNX : Repeat same thing for fragment shader */
+    std::string fragmentShaderSource = readShaderFile(std::string(PROJECT_SOURCE_DIR) + "/shaders/triangle.fs.glsl");
+    const char* fragmentShaderSource_c = fragmentShaderSource.c_str();
+
+    unsigned int fragmentShader;
+    fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(fragmentShader, 1, &fragmentShaderSource_c, NULL);
+    glCompileShader(fragmentShader);
+
+    GLint fs_compile_result;
+    glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &fs_compile_result);
+    if (fs_compile_result != GL_TRUE){
+        std::cerr << "[ERROR] Fragment Shader Compiler Error" << std::endl;
+
+        char errBuff[1024];
+        int bufLen;
+        glGetShaderInfoLog(fragmentShader, 1024, &bufLen, errBuff);
+        std::cout << "Fragment Shader Info : " << errBuff << std::endl;
+    } else {
+        std::cout << "[INFO] Fragment Shader Compiled Successfully" << std::endl;
+    }
 }
 
 int main(int argc, char const *argv[])
@@ -105,6 +125,9 @@ int main(int argc, char const *argv[])
 
     /* KNX : Change the viewport size as user change the window size*/
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+
+    /* KNX : Init the renderer*/
+    renderer_init(window);
 
     /* Loop until the user closes the window */
     while(!glfwWindowShouldClose(window)){
