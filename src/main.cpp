@@ -14,6 +14,25 @@ void processInput (GLFWwindow* window)
         glfwSetWindowShouldClose(window, true);
 }
 
+void renderer_init (GLFWwindow* window)
+{
+    float vertices[] = {
+        -0.5f, -0.5f, 0.0f,
+         0.5f, -0.5f, 0.0f,
+         0.0f,  0.5f, 0.0f,
+    };
+
+    /* KNX : Create VBO */
+    unsigned int VBO;
+    glGenBuffers(1, &VBO);
+
+    /* KNX : Set given VBO as GL_ARRAY_BUFFER */
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);     // GL_ARRAY_BUFFER = Buffer that stores vertex
+
+    /* KNX : Copy the vertex data to buffer's memory*/
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+}
+
 int main(int argc, char const *argv[])
 {
     /* GLFW Window Initial Setup: https://www.glfw.org/documentation.html */
@@ -62,6 +81,7 @@ int main(int argc, char const *argv[])
         processInput(window);
 
         /* Render here */
+        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
         /* Swap front and back buffers */
