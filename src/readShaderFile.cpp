@@ -5,7 +5,7 @@
 std::string readShaderFile(const std::string &filename)
 {
     /* Reference : CPSC427 SimpleGL */
-    std::cout << "[INFO] Renderer : Loading shader filename " << filename << std::endl;
+    std::cout << "[INFO] Loading shader filename " << filename << std::endl;
 
     /* KNX : Input File Stream (File -> Data)*/
     std::ifstream ifs(filename);

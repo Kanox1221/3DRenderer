@@ -82,6 +82,26 @@ void renderer_init (GLFWwindow* window)
     } else {
         std::cout << "[INFO] Fragment Shader Compiled Successfully" << std::endl;
     }
+
+    /* KNX : Create our shader program and link in shaders */
+    unsigned int shaderProgram;
+    shaderProgram = glCreateProgram();
+    glAttachShader(shaderProgram, vertexShader);
+    glAttachShader(shaderProgram, fragmentShader);
+    glLinkProgram(shaderProgram);
+
+    GLint sp_link_result;
+    glGetProgramiv(shaderProgram, GL_LINK_STATUS, &sp_link_result);
+    if (sp_link_result != GL_TRUE){
+        std::cerr << "[ERROR] Shader Program Link Error" << std::endl;
+
+        char errBuff[1024];
+        int bufLen;
+        glGetShaderInfoLog(shaderProgram, 1024, &bufLen, errBuff);
+        std::cout << "Shader Program Info : " << errBuff << std::endl;
+    } else {
+        std::cout << "[INFO] Shader Program Linked Successfully" << std::endl;
+    }
 }
 
 int main(int argc, char const *argv[])
