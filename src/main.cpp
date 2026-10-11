@@ -1,5 +1,8 @@
 #include "config.h"
 
+const int WINDOW_WIDTH = 1920;
+const int WINDOW_HEIGHT = 1080;
+
 int main(int argc, char const *argv[])
 {
     /* GLFW Window Initial Setup: https://www.glfw.org/documentation.html */
@@ -7,28 +10,40 @@ int main(int argc, char const *argv[])
 
     /* Initialize the library */
     if(!glfwInit()){
-        std::cerr << "GLFW couldn't start" << std::endl;
+        std::cerr << "GLFW : GLFW couldn't start" << std::endl;
         return -1;
     }
-    
+    /* KNX : Configure GLFW*/
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
     /* Create a windowed mode window and its OpenGL context */
-    window = glfwCreateWindow(1920, 1040, "3D Renderer", NULL, NULL);
+    window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "3D Renderer", NULL, NULL);
 
     if(!window){
+        std::cerr << "GLFW : Failed to create GLFW window" << std::endl;
         glfwTerminate();
-        return -1;
+        return EXIT_FAILURE;
     }
 
-    std::cout << "GLFW: Window Opened" << std::endl;
+    std::cout << "GLFW : Window Opened" << std::endl;
 
     /* Make the window's context current */
     glfwMakeContextCurrent(window);
 
+    /* Load OpenGL functions through GLAD*/
 	if (!gladLoadGLLoader((GLADloadproc) glfwGetProcAddress)) {
         glfwTerminate();
-		std::cerr << "GLAD couldn't start" << std::endl;
-		return -1;
+		std::cerr << "GLAD : Failed to initialize GLAD" << std::endl;
+		return EXIT_FAILURE;
 	}
+
+    /* KNX : Tell OpenGL the size of the rendering window*/
+    glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
+
+    /* KNX : Change the viewport size as user change the window size*/
+    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
     /* Loop until the user closes the window */
     while(!glfwWindowShouldClose(window)){
@@ -44,5 +59,9 @@ int main(int argc, char const *argv[])
 
     glfwTerminate();
 
-    return 0;
+    return EXIT_SUCCESS;
+}
+
+void framebuffer_size_callback(GLFWwindow* window, int width, int height){
+    glViewport(0, 0, width, height);
 }

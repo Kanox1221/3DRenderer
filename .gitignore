@@ -20,7 +20,6 @@ Makefile
 *.dylib
 *.obj
 *.o
-*.lib
 *.a
 *.pdb
 
