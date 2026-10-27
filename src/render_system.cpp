@@ -12,17 +12,17 @@ bool RenderSystem::init(GLFWwindow* window)
     // ============================ VBO & VAO ===============================
     // ======================================================================
     /* KNX : Create VBO */
-    glGenBuffers(1, &VBO);
+    glGenBuffers(1, &VBO_);
 
     /* KNX : Set given VBO as GL_ARRAY_BUFFER */
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);     // GL_ARRAY_BUFFER = Buffer that stores vertex
+    glBindBuffer(GL_ARRAY_BUFFER, VBO_);     // GL_ARRAY_BUFFER = Buffer that stores vertex
 
     /* KNX : Copy the vertex data to buffer's memory */
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
     /* KNX : Create VAO */
-    glGenVertexArrays(1, &VAO);
-    glBindVertexArray(VAO);
+    glGenVertexArrays(1, &VAO_);
+    glBindVertexArray(VAO_);
 
     /* KNX : VAO setting */
     unsigned int stride = 3 * sizeof(float);
@@ -80,26 +80,26 @@ bool RenderSystem::init(GLFWwindow* window)
     }
 
     /* KNX : Create our shader program and link in shaders */
-    shaderProgram = glCreateProgram();
-    glAttachShader(shaderProgram, vertexShader);
-    glAttachShader(shaderProgram, fragmentShader);
-    glLinkProgram(shaderProgram);
+    shaderProgram_ = glCreateProgram();
+    glAttachShader(shaderProgram_, vertexShader);
+    glAttachShader(shaderProgram_, fragmentShader);
+    glLinkProgram(shaderProgram_);
 
     GLint sp_link_result;
-    glGetProgramiv(shaderProgram, GL_LINK_STATUS, &sp_link_result);
+    glGetProgramiv(shaderProgram_, GL_LINK_STATUS, &sp_link_result);
     if (sp_link_result != GL_TRUE){
         std::cerr << "[ERROR] Shader Program Link Error" << std::endl;
 
         char errBuff[1024];
         int bufLen;
-        glGetShaderInfoLog(shaderProgram, 1024, &bufLen, errBuff);
+        glGetShaderInfoLog(shaderProgram_, 1024, &bufLen, errBuff);
         std::cout << "Shader Program Info : " << errBuff << std::endl;
     } else {
         std::cout << "[INFO] Shader Program Linked Successfully" << std::endl;
     }
 
     /* KNX : Activate the program*/
-    glUseProgram(shaderProgram);
+    glUseProgram(shaderProgram_);
     
     /* KNX : Delete shader after link
             Program already drawn the result when the link is successful*/
@@ -127,9 +127,9 @@ bool RenderSystem::init(GLFWwindow* window)
         rightModel, glm::vec3(1.0f, 0.0f, 0.0f)
     );
 
-    models.push_back(model);
-    models.push_back(leftModel);
-    models.push_back(rightModel);
+    models_.push_back(model);
+    models_.push_back(leftModel);
+    models_.push_back(rightModel);
 
     glm::mat4 view = glm::mat4(1.0f);
     view = glm::lookAt(
@@ -147,37 +147,38 @@ bool RenderSystem::init(GLFWwindow* window)
     );
     
     /* KNX : Send matrices to shader */
-    viewLoc = glGetUniformLocation(shaderProgram, "view");
-    glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+    viewLoc_ = glGetUniformLocation(shaderProgram_, "view");
 
-    projLoc = glGetUniformLocation(shaderProgram, "projection");
-    glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
+    projLoc_ = glGetUniformLocation(shaderProgram_, "projection");
+    glUniformMatrix4fv(projLoc_, 1, GL_FALSE, glm::value_ptr(projection));
 
-    modelLoc = glGetUniformLocation(shaderProgram, "model");
+    modelLoc_ = glGetUniformLocation(shaderProgram_, "model");
 
     return true;
 }
 
-void RenderSystem::draw()
+void RenderSystem::draw(glm::mat4 view)
 {
     /* Render here */
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
+    glUniformMatrix4fv(viewLoc_, 1, GL_FALSE, glm::value_ptr(view));
+
     /* KNX : Draw 3 triangles with 3 different model matrix */
-    for (const glm::mat4& model : models){
-        glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+    for (const glm::mat4& model : models_){
+        glUniformMatrix4fv(modelLoc_, 1, GL_FALSE, glm::value_ptr(model));
         glDrawArrays(GL_TRIANGLES, 0, 3);
     }
 }
 
 void RenderSystem::shutdown()
 {
-    glDeleteBuffers(1, &VBO);
-    glDeleteVertexArrays(1, &VAO);
-    glDeleteProgram(shaderProgram);
+    glDeleteBuffers(1, &VBO_);
+    glDeleteVertexArrays(1, &VAO_);
+    glDeleteProgram(shaderProgram_);
 
-    VBO = 0;
-    VAO = 0;
-    shaderProgram = 0;
+    VBO_ = 0;
+    VAO_ = 0;
+    shaderProgram_ = 0;
 }
