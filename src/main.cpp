@@ -20,7 +20,7 @@ void processInput (GLFWwindow* window)
         glfwSetWindowShouldClose(window, true);
 }
 
-void renderer_init (GLFWwindow* window)
+unsigned int renderer_init (GLFWwindow* window)
 {
     float vertices[] = {
         -0.5f, -0.5f, 0.0f,
@@ -129,22 +129,39 @@ void renderer_init (GLFWwindow* window)
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
 
+    return shaderProgram;
+}
+
+void renderer_draw(unsigned int shaderProgram)
+{
     // ======================================================================
     // ===================== Model & View & Projection ======================
     // ======================================================================
     /* KNX : Make mat4 for MVP */
     glm::mat4 model = glm::mat4(1.0f);
-    model = glm::rotate(
-        model,
-        glm::radians(45.0f),
-        glm::vec3(0.0f, 1.0f, 0.0f)
+    // model = glm::rotate(
+    //     model,
+    //     glm::radians(45.0f),
+    //     glm::vec3(0.0f, 1.0f, 0.0f)
+    // );
+
+    glm::mat4 leftModel = glm::mat4(1.0f);
+    leftModel = glm::translate(
+        leftModel, glm::vec3(-1.0f, 0.0f, 0.0f)
     );
+
+    glm::mat4 rightModel = glm::mat4(1.0f);
+    rightModel = glm::translate(
+        rightModel, glm::vec3(1.0f, 0.0f, 0.0f)
+    );
+
     glm::mat4 view = glm::mat4(1.0f);
     view = glm::lookAt(
         glm::vec3(0.0f, 0.0f, 3.0f),    // Camera Position
         glm::vec3(0.0f, 0.0f, 0.0f),    // Looking to
         glm::vec3(0.0f, 1.0f, 0.0f)     // Where is up
     );
+    
     glm::mat4 projection = glm::mat4(1.0f);
     projection = glm::perspective(
         glm::radians(45.0f),            // Fovy
@@ -154,14 +171,21 @@ void renderer_init (GLFWwindow* window)
     );
     
     /* KNX : Send matrices to shader */
-    int modelLoc = glGetUniformLocation(shaderProgram, "model");
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-
     int viewLoc = glGetUniformLocation(shaderProgram, "view");
     glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
 
     int projLoc = glGetUniformLocation(shaderProgram, "projection");
     glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
+
+    int modelLoc = glGetUniformLocation(shaderProgram, "model");
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+    glDrawArrays(GL_TRIANGLES, 0, 3);
+
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(leftModel));
+    glDrawArrays(GL_TRIANGLES, 0, 3);
+
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(rightModel));
+    glDrawArrays(GL_TRIANGLES, 0, 3);
 }
 
 int main(int argc, char const *argv[])
@@ -207,7 +231,7 @@ int main(int argc, char const *argv[])
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
     /* KNX : Init the renderer*/
-    renderer_init(window);
+    unsigned int shaderProgram = renderer_init(window);
 
     /* Loop until the user closes the window */
     while(!glfwWindowShouldClose(window)){
@@ -219,7 +243,7 @@ int main(int argc, char const *argv[])
         glClear(GL_COLOR_BUFFER_BIT);
 
         /* KNX : Draw triangle */
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+        renderer_draw(shaderProgram);
 
         /* Swap front and back buffers */
         glfwSwapBuffers(window);
