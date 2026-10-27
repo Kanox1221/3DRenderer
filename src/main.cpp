@@ -134,8 +134,24 @@ void renderer_init (GLFWwindow* window)
     // ======================================================================
     /* KNX : Make mat4 for MVP */
     glm::mat4 model = glm::mat4(1.0f);
+    model = glm::rotate(
+        model,
+        glm::radians(45.0f),
+        glm::vec3(0.0f, 1.0f, 0.0f)
+    );
     glm::mat4 view = glm::mat4(1.0f);
+    view = glm::lookAt(
+        glm::vec3(0.0f, 0.0f, 3.0f),    // Camera Position
+        glm::vec3(0.0f, 0.0f, 0.0f),    // Looking to
+        glm::vec3(0.0f, 1.0f, 0.0f)     // Where is up
+    );
     glm::mat4 projection = glm::mat4(1.0f);
+    projection = glm::perspective(
+        glm::radians(45.0f),            // Fovy
+        1920.0f / 1080.f,               // Aspect
+        0.1f,                           // Near
+        100.f                           // Far
+    );
     
     /* KNX : Send matrices to shader */
     int modelLoc = glGetUniformLocation(shaderProgram, "model");
@@ -146,7 +162,6 @@ void renderer_init (GLFWwindow* window)
 
     int projLoc = glGetUniformLocation(shaderProgram, "projection");
     glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
-
 }
 
 int main(int argc, char const *argv[])
