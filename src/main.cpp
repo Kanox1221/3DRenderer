@@ -85,6 +85,9 @@ int main(int argc, char const *argv[])
         glfwPollEvents();
     }
 
+    renderer.shutdown();
+
+    glfwDestroyWindow(window);
     glfwTerminate();
 
     return EXIT_SUCCESS;
