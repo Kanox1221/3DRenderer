@@ -1,10 +1,28 @@
 #include "camera_system.hpp"
 
-void CameraSystem::update(float forwardInput, float rightInput, float deltaTime)
+void CameraSystem::update(float forwardInput, float rightInput,
+    float mouseDeltaX, float mouseDeltaY, float deltaTime)
 {
-    float cameraSpeed = sensitivity_ * deltaTime;
+    /* Rotation Update */
+    yaw_   += mouseDeltaX * mouseSensitivity_;
+    pitch_ -= mouseDeltaY * mouseSensitivity_;
+    pitch_ = glm::clamp(pitch_, -89.0f, 89.0f);
 
-    position_ += front_ * forwardInput * cameraSpeed + right_ * rightInput * cameraSpeed;
+    float yawRad = glm::radians(yaw_);
+    float pitchRad = glm::radians(pitch_);
+
+    /* Camera Axis Update */
+    front_ = glm::normalize(glm::vec3(
+        cos(yawRad) * cos(pitchRad),
+        sin(pitchRad),
+        sin(yawRad) * cos(pitchRad)
+    ));
+
+    right_ = glm::normalize(glm::cross(front_, up_));
+
+    /* Camera Axis Update */
+    float cameraSpeed = movementSpeed_ * deltaTime;
+    position_ += (front_ * forwardInput + right_ * rightInput) * cameraSpeed;
 
     view_ = glm::lookAt(
         position_,

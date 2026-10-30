@@ -11,17 +11,28 @@
 const int WINDOW_WIDTH = 1920;
 const int WINDOW_HEIGHT = 1080;
 
-struct CameraInput{
+struct CameraKeyboardInput{
     float forward = 0.f;
     float right = 0.f;
 };
 
-void framebuffer_size_callback(GLFWwindow* window, int width, int height)
+struct MouseState{
+    bool initialized = false;
+    double lastX = 0.0;
+    double lastY = 0.0;
+};
+
+struct CameraMouseInput{ 
+    double deltaX = 0.f;
+    double deltaY = 0.f;
+};
+
+void framebufferSizeCallback(GLFWwindow* window, int width, int height)
 {
     glViewport(0, 0, width, height);
-}
+};
 
-CameraInput processInput (GLFWwindow* window, CameraSystem camera)
+CameraKeyboardInput processInput (GLFWwindow* window, CameraSystem camera)
 {
     if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) 
         glfwSetWindowShouldClose(window, true);
@@ -29,15 +40,34 @@ CameraInput processInput (GLFWwindow* window, CameraSystem camera)
     // ======================================================================
     // =========================== Camera Control ===========================
     // ======================================================================
-    CameraInput cameraInput;
+    CameraKeyboardInput cameraInput;
 
     if(glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) cameraInput.forward += 1.f;
     if(glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) cameraInput.forward -= 1.f;
-    if(glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) cameraInput.right -= 1.f;
-    if(glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) cameraInput.right += 1.f;
+    if(glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) cameraInput.right += 1.f;
+    if(glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) cameraInput.right -= 1.f;
 
     return cameraInput;
-}
+};
+
+CameraMouseInput processMouseInput(GLFWwindow* window, MouseState& state)
+{
+    double x, y;
+    glfwGetCursorPos(window, &x, &y);
+
+    CameraMouseInput input{};
+
+    if (state.initialized) {
+        input.deltaX = x - state.lastX;
+        input.deltaY = y - state.lastY;
+    }
+
+    state.lastX = x;
+    state.lastY = y;
+    state.initialized = true;
+
+    return input;
+};
 
 int main(int argc, char const *argv[])
 {
@@ -82,12 +112,16 @@ int main(int argc, char const *argv[])
     glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
 
     /* KNX : Change the viewport size as user change the window size*/
-    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+    glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
 
-    /* KNX : Init the renderer*/
+    /* KNX : Init the renderer */
     renderer.init(window);
 
+    /* KNX : Get Time */
     double previousTime = glfwGetTime();
+
+    /* KNX : Remember the previous position */
+    MouseState mouseState;
 
     /* Loop until the user closes the window */
     while(!glfwWindowShouldClose(window)){
@@ -97,10 +131,12 @@ int main(int argc, char const *argv[])
         previousTime = currentTime;
 
         /* KNX : Process User Input */
-        CameraInput cameraInput = processInput(window, camera);
+        CameraKeyboardInput cameraKeyboardInput = processInput(window, camera);
+        CameraMouseInput cameraMouseInput = processMouseInput(window, mouseState);
 
         /* KNX : Camera Update */
-        camera.update(cameraInput.forward, cameraInput.right, deltaTime);
+        camera.update(cameraKeyboardInput.forward, cameraKeyboardInput.right,
+            static_cast<float>(cameraMouseInput.deltaX), static_cast<float>(cameraMouseInput.deltaY), deltaTime);
 
         /* KNX : Draw */
         renderer.draw(camera.getViewMatrix());
