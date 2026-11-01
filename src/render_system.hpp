@@ -3,25 +3,22 @@
 #include "config.h"
 #include "readShaderFile.hpp"
 #include "assert.h"
-
-// GLM include
-#include <glm.hpp>
-#include <glm/gtc/type_ptr.hpp>
+#include "camera_system.hpp"
 
 class RenderSystem
 {
 public:
     bool init(GLFWwindow* window);
-    void draw();
+    void draw(glm::mat4 view);
     void shutdown();
 private:
-    GLuint shaderProgram = 0;
-    GLuint VAO = 0;
-    GLuint VBO = 0;
+    GLuint shaderProgram_ = 0;
+    GLuint VAO_ = 0;
+    GLuint VBO_ = 0;
 
-    GLint modelLoc = -1;
-    GLint viewLoc = -1;
-    GLint projLoc = -1;
+    GLint modelLoc_ = -1;
+    GLint viewLoc_ = -1;
+    GLint projLoc_ = -1;
 
-    std::vector<glm::mat4> models;
+    std::vector<glm::mat4> models_;
 };
