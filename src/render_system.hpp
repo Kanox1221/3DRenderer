@@ -15,6 +15,7 @@ private:
     GLuint shaderProgram_ = 0;
     GLuint VAO_ = 0;
     GLuint VBO_ = 0;
+    GLuint EBO_ = 0;
 
     GLint modelLoc_ = -1;
     GLint viewLoc_ = -1;

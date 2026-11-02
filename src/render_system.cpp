@@ -3,9 +3,43 @@
 bool RenderSystem::init(GLFWwindow* window)
 {
     float vertices[] = {
-        -0.5f, -0.5f, 0.0f,
-         0.5f, -0.5f, 0.0f,
-         0.0f,  0.5f, 0.0f,
+        // Front Square
+        -0.5f, -0.5f, -0.5f,
+         0.5f, -0.5f, -0.5f,
+         0.5f,  0.5f, -0.5f,
+        -0.5f,  0.5f, -0.5f,
+
+        // Back Square
+        -0.5f, -0.5f,  0.5f,
+         0.5f, -0.5f,  0.5f,
+         0.5f,  0.5f,  0.5f,
+        -0.5f,  0.5f,  0.5f,
+    };
+
+    uint32_t indices[] = {
+        // Front Square
+        0, 2, 1,
+        0, 3, 2,
+        
+        // Bottom Square
+        0, 4, 5,
+        0, 5, 1,
+
+        // Back Square
+        4, 5, 6,
+        4, 6, 7,
+
+        // Top Square
+        3, 2, 6,
+        3, 6, 7,
+
+        // Left Square
+        0, 7, 4,
+        0, 3, 7,
+
+        // Right Square
+        1, 5, 6,
+        1, 6, 2,
     };
 
     // ======================================================================
@@ -29,6 +63,15 @@ bool RenderSystem::init(GLFWwindow* window)
     // Location = 0 / # of vertices / Type of data / Data to be normalized / Stride / Offset
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride, (void*) 0); 
     glEnableVertexAttribArray(0);
+
+    /* KNX : Create EBO */
+    glGenBuffers(1, &EBO_);
+
+    /* KNX : Set EBO as GL_ELEMENT_ARRAY_BUFFER */
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO_);
+
+    /* KNX : Copy the indices data to buffer's memory */
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
     // ======================================================================
     // =============================== Shader ===============================
@@ -117,19 +160,19 @@ bool RenderSystem::init(GLFWwindow* window)
     //     glm::vec3(0.0f, 1.0f, 0.0f)
     // );
 
-    glm::mat4 leftModel = glm::mat4(1.0f);
-    leftModel = glm::translate(
-        leftModel, glm::vec3(-1.0f, 0.0f, 0.0f)
-    );
+    // glm::mat4 leftModel = glm::mat4(1.0f);
+    // leftModel = glm::translate(
+    //     leftModel, glm::vec3(-1.0f, 0.0f, 0.0f)
+    // );
 
-    glm::mat4 rightModel = glm::mat4(1.0f);
-    rightModel = glm::translate(
-        rightModel, glm::vec3(1.0f, 0.0f, 0.0f)
-    );
+    // glm::mat4 rightModel = glm::mat4(1.0f);
+    // rightModel = glm::translate(
+    //     rightModel, glm::vec3(1.0f, 0.0f, 0.0f)
+    // );
 
     models_.push_back(model);
-    models_.push_back(leftModel);
-    models_.push_back(rightModel);
+    // models_.push_back(leftModel);
+    // models_.push_back(rightModel);
 
     glm::mat4 view = glm::mat4(1.0f);
     view = glm::lookAt(
@@ -168,7 +211,8 @@ void RenderSystem::draw(glm::mat4 view)
     /* KNX : Draw 3 triangles with 3 different model matrix */
     for (const glm::mat4& model : models_){
         glUniformMatrix4fv(modelLoc_, 1, GL_FALSE, glm::value_ptr(model));
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+        glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, (void*) 0);
+        // glDrawArrays(GL_TRIANGLES, 0, 3);
     }
 }
 
