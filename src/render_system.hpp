@@ -29,7 +29,9 @@ private:
     GLuint groundVBO_ = 0;
     GLuint groundEBO_ = 0;
 
-    GLint modelLoc_ = -1;
-    GLint viewLoc_ = -1;
-    GLint projLoc_ = -1;
+    GLuint modelLoc_ = -1;
+    GLuint viewLoc_ = -1;
+    GLuint projLoc_ = -1;
+
+    std::vector<glm::mat4> models_;
 };

@@ -2,8 +2,6 @@
 
 bool RenderSystem::init(GLFWwindow* window)
 {
-
-
     // ======================================================================
     // =========================== Depth Test ===============================
     // ======================================================================
@@ -27,7 +25,11 @@ bool RenderSystem::init(GLFWwindow* window)
     // ===================== Model & View & Projection ======================
     // ======================================================================
     /* KNX : Make mat4 for MVP */
-    glm::mat4 model = glm::mat4(1.0f);
+    glm::mat4 cubeModel = glm::mat4(1.0f);
+    glm::mat4 groundModel = glm::mat4(1.0f);
+
+    models_.push_back(cubeModel);
+    models_.push_back(groundModel);
 
     glm::mat4 view = glm::mat4(1.0f);
     view = glm::lookAt(
@@ -51,8 +53,6 @@ bool RenderSystem::init(GLFWwindow* window)
     glUniformMatrix4fv(projLoc_, 1, GL_FALSE, glm::value_ptr(projection));
 
     modelLoc_ = glGetUniformLocation(shaderProgram_, "model");
-    glUniformMatrix4fv(modelLoc_, 1, GL_FALSE, glm::value_ptr(model));
-
     return true;
 }
 
@@ -124,7 +124,7 @@ void RenderSystem::setupShaders()
 
         char errBuff[1024];
         int bufLen;
-        glGetShaderInfoLog(shaderProgram_, 1024, &bufLen, errBuff);
+        glGetProgramInfoLog(shaderProgram_, 1024, &bufLen, errBuff);
         std::cout << "Shader Program Info : " << errBuff << std::endl;
     }
     else
@@ -199,20 +199,20 @@ void RenderSystem::setupCube()
         0, 3, 2,
 
         // Bottom Square
-        0, 4, 5,
-        0, 5, 1,
+        0, 5, 4,
+        0, 1, 5,
 
         // Back Square
         4, 5, 6,
         4, 6, 7,
 
         // Top Square
-        3, 2, 6,
-        3, 6, 7,
+        3, 6, 2,
+        3, 7, 6,
 
         // Left Square
-        0, 7, 4,
-        0, 3, 7,
+        0, 4, 7,
+        0, 7, 3,
 
         // Right Square
         1, 5, 6,
@@ -259,12 +259,14 @@ void RenderSystem::draw(glm::mat4 view)
     glUniformMatrix4fv(viewLoc_, 1, GL_FALSE, glm::value_ptr(view));
 
     /* KNX : Draw Cube */
+    glUniformMatrix4fv(modelLoc_, 1, GL_FALSE, glm::value_ptr(models_[0]));
     glUniform3f(objectColorLoc_, 1.0f, 0.5f, 0.0f);     // Color cube as orange
     glBindVertexArray(cubeVAO_);
     glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, (void*) 0);
     // glDrawArrays(GL_TRIANGLES, 0, 3);
 
     /* KNX : Draw Floor */
+    glUniformMatrix4fv(modelLoc_, 1, GL_FALSE, glm::value_ptr(models_[1]));
     glUniform3f(objectColorLoc_, 0.4f, 0.4f, 0.4f);     // Color ground as grey
     glBindVertexArray(groundVAO_);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (void*) 0);
@@ -273,10 +275,21 @@ void RenderSystem::draw(glm::mat4 view)
 void RenderSystem::shutdown()
 {
     glDeleteBuffers(1, &cubeVBO_);
+    glDeleteBuffers(1, &cubeEBO_);
     glDeleteVertexArrays(1, &cubeVAO_);
+
+    glDeleteBuffers(1, &groundVBO_);
+    glDeleteBuffers(1, &groundEBO_);
+    glDeleteVertexArrays(1, &groundVAO_);
     glDeleteProgram(shaderProgram_);
 
     cubeVBO_ = 0;
+    cubeEBO_ = 0;
     cubeVAO_ = 0;
+
+    groundVBO_ = 0;
+    groundEBO_ = 0;
+    groundVAO_ = 0;
+
     shaderProgram_ = 0;
 }
