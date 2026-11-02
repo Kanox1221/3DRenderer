@@ -9,13 +9,18 @@ class RenderSystem
 {
 public:
     bool init(GLFWwindow *window);
+
+    /* Setup helper functions */
     void setupShaders();
     void setupGround();
     void setupCube();
+
     void draw(glm::mat4 view);
     void shutdown();
 private:
     GLuint shaderProgram_ = 0;
+    GLuint objectColorLoc_ = 0;
+
     GLuint cubeVAO_ = 0;
     GLuint cubeVBO_ = 0;
     GLuint cubeEBO_ = 0;

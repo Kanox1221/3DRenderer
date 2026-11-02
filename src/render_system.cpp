@@ -20,6 +20,9 @@ bool RenderSystem::init(GLFWwindow* window)
     // ======================================================================
     setupShaders();
 
+    /* KNX : Get location for objectColor */
+    objectColorLoc_ = glGetUniformLocation(shaderProgram_, "ObjectColor");
+
     // ======================================================================
     // ===================== Model & View & Projection ======================
     // ======================================================================
@@ -256,11 +259,13 @@ void RenderSystem::draw(glm::mat4 view)
     glUniformMatrix4fv(viewLoc_, 1, GL_FALSE, glm::value_ptr(view));
 
     /* KNX : Draw Cube */
+    glUniform3f(objectColorLoc_, 1.0f, 0.5f, 0.0f);     // Color cube as orange
     glBindVertexArray(cubeVAO_);
     glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, (void*) 0);
     // glDrawArrays(GL_TRIANGLES, 0, 3);
 
     /* KNX : Draw Floor */
+    glUniform3f(objectColorLoc_, 0.4f, 0.4f, 0.4f);     // Color ground as grey
     glBindVertexArray(groundVAO_);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (void*) 0);
 }
