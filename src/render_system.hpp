@@ -4,6 +4,7 @@
 #include "readShaderFile.hpp"
 #include "assert.h"
 #include "camera_system.hpp"
+#include "stb_image/stb_image.h"
 
 class RenderSystem
 {
@@ -27,6 +28,8 @@ private:
     GLuint groundVAO_ = 0;
     GLuint groundVBO_ = 0;
     GLuint groundEBO_ = 0;
+
+    GLuint grassTexture_ = 0;
 
     GLint objectColorLoc_ = 0;
 

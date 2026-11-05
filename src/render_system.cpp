@@ -14,9 +14,40 @@ bool RenderSystem::init(GLFWwindow* window)
     setupGround();
 
     // ======================================================================
-    // =============================== Shader ===============================
+    // ========================= Shader & Textures ==========================
     // ======================================================================
     setupShaders();
+
+    glGenTextures(1, &grassTexture_);
+    glBindTexture(GL_TEXTURE_2D, grassTexture_);
+
+    /* KNX : Set texture wrapping, filtering options */
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    /* KNX : Load Image Texture */
+    int tex_width, tex_height, nrChannels;
+    std::string texturePath = std::string(PROJECT_SOURCE_DIR) + "/assets/textures/grass-texture.png";
+    unsigned char *tex_data = stbi_load(texturePath.c_str(), &tex_width, &tex_height, &nrChannels, STBI_rgb); 
+
+    if (tex_data){
+        /* KNX :
+        Generate Texture:Texture Target, Mipmap Level, Format of storing texture,
+                         Texture width, Texture height, 0 (Legacy),
+                         Texture Format Type, Texture Data Type, Texture Data */
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, tex_width, tex_height,
+            0, GL_RGB, GL_UNSIGNED_BYTE, tex_data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+
+        std::cout << "[INFO] Grass Texture Load Successfully" << std::endl;
+    } else {
+        std::cerr << "[ERROR] Grass Texture Load Error" << std::endl;
+        std::cout << "Texture Load Info : " << stbi_failure_reason() << std::endl;
+    }
+
+    stbi_image_free(tex_data);
 
     /* KNX : Get location for objectColor */
     objectColorLoc_ = glGetUniformLocation(shaderProgram_, "ObjectColor");
@@ -59,7 +90,7 @@ bool RenderSystem::init(GLFWwindow* window)
 void RenderSystem::setupShaders()
 {
     /* KNX : Read our vertex shader file */
-    std::string vertexShaderSource = readShaderFile(std::string(PROJECT_SOURCE_DIR) + "/shaders/triangle.vs.glsl");
+    std::string vertexShaderSource = readShaderFile(std::string(PROJECT_SOURCE_DIR) + "/shaders/basic.vs.glsl");
     const char *vertexShaderSource_c = vertexShaderSource.c_str();
 
     /* KNX : Create and compile vertex shader*/
@@ -86,7 +117,7 @@ void RenderSystem::setupShaders()
     }
 
     /* KNX : Repeat same thing for fragment shader */
-    std::string fragmentShaderSource = readShaderFile(std::string(PROJECT_SOURCE_DIR) + "/shaders/triangle.fs.glsl");
+    std::string fragmentShaderSource = readShaderFile(std::string(PROJECT_SOURCE_DIR) + "/shaders/basic.fs.glsl");
     const char *fragmentShaderSource_c = fragmentShaderSource.c_str();
 
     unsigned int fragmentShader;
@@ -144,10 +175,10 @@ void RenderSystem::setupShaders()
 void RenderSystem::setupGround()
 {
     float ground_vertices[] = {
-        -1.0f, -1.0f, -1.0f,
-        1.0f, -1.0f, -1.0f,
-        1.0f, -1.0f,  1.0f,
-        -1.0f, -1.0f,  1.0f,
+        -1.0f, -1.0f, -1.0f,    0.0f, 0.0f,
+         1.0f, -1.0f, -1.0f,    1.0f, 0.0f,
+         1.0f, -1.0f,  1.0f,    1.0f, 1.0f,
+        -1.0f, -1.0f,  1.0f,    0.0f, 1.0f,
     };
 
     uint32_t ground_indices[] = {
@@ -167,11 +198,17 @@ void RenderSystem::setupGround()
     glBindBuffer(GL_ARRAY_BUFFER, groundVBO_);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, groundEBO_);
 
-    uint32_t stride = 3 * sizeof(float);
+    uint32_t stride = (3 + 2) * sizeof(float);
     glBufferData(GL_ARRAY_BUFFER, sizeof(ground_vertices), ground_vertices, GL_STATIC_DRAW);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(ground_indices), ground_indices, GL_STATIC_DRAW);
+    
+    /* KNX : Read Vertex Coordinate */
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride, (void *)0);
     glEnableVertexAttribArray(0);
+
+    /* KNX : Read Texture Coordinate */
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, stride, (void *)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
 
     // Deselect VAO
     glBindVertexArray(0);
@@ -281,6 +318,9 @@ void RenderSystem::shutdown()
     glDeleteBuffers(1, &groundVBO_);
     glDeleteBuffers(1, &groundEBO_);
     glDeleteVertexArrays(1, &groundVAO_);
+
+    glDeleteTextures(1, &grassTexture_);
+
     glDeleteProgram(shaderProgram_);
 
     cubeVBO_ = 0;
@@ -290,6 +330,8 @@ void RenderSystem::shutdown()
     groundVBO_ = 0;
     groundEBO_ = 0;
     groundVAO_ = 0;
+
+    grassTexture_ = 0;
 
     shaderProgram_ = 0;
 }

@@ -9,6 +9,7 @@ file(GLOB_RECURSE SOURCE_FILES src/*.cpp src/*.hpp)
 add_executable(Renderer
     # src/main.cpp
     external/glad/glad.c
+    external/stb_image/stb_image.h
     # src/readShaderFile.cpp
     ${SOURCE_FILES}
 )
