@@ -11,6 +11,16 @@ This project focuses on implementing core real-time graphics concepts from the g
 - GLFW
 - CMake
 
+## Current Features
+
+- GLFW window and OpenGL context setup
+- Shader setup
+- Cube and ground plane rendering using indexed drawing with EBOs
+- Separate VAO, VBO, and EBO setup for each object
+- Camera controls
+
+![Cube and ground](doc\images\cube-ground.png)
+
 ## Goals
 
 - Understand the basic real-time rendering pipeline
