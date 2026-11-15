@@ -35,9 +35,11 @@ bool RenderSystem::init(GLFWwindow *window, const std::vector<MeshData>& meshes)
     /* KNX : Make mat4 for MVP */
     glm::mat4 cubeModel = glm::mat4(1.0f);
     glm::mat4 groundModel = glm::mat4(1.0f);
+    glm::mat4 forestModel = glm::mat4(1.0f);
 
     models_.push_back(cubeModel);
     models_.push_back(groundModel);
+    models_.push_back(forestModel);
 
     glm::mat4 view = glm::mat4(1.0f);
     view = glm::lookAt(
@@ -320,6 +322,12 @@ void RenderSystem::draw(glm::mat4 view)
     glUniform3f(objectColorLoc_, 0.4f, 0.4f, 0.4f);     // Color ground as grey
     glBindVertexArray(groundVAO_);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (void*) 0);
+
+    /* KNX : Draw Forest Model */
+    glUniformMatrix4fv(modelLoc_, 1, GL_FALSE, glm::value_ptr(models_[2]));
+    glUniform3f(objectColorLoc_, 0.6f, 0.9f, 0.4f);     // Color forest model as green
+    glBindVertexArray(meshVAO_);
+    glDrawElements(GL_TRIANGLES, numIndices_, GL_UNSIGNED_INT, (void*) 0);
 }
 
 void RenderSystem::shutdown()
