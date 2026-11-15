@@ -8,6 +8,9 @@
 // Camera System
 #include "camera_system.hpp"
 
+// Model Loader
+#include "model_loader.hpp"
+
 const int WINDOW_WIDTH = 1920;
 const int WINDOW_HEIGHT = 1080;
 
@@ -122,6 +125,15 @@ int main(int argc, char const *argv[])
 
     /* KNX : Remember the previous position */
     MouseState mouseState;
+
+    /* KNZ : Load the Model */
+    ModelLoader modelLoader;
+
+    const std::string modelPath = std::string(PROJECT_SOURCE_DIR) + "/data/models/forest.FBX";
+
+    if (!modelLoader.inspect(modelPath)) {
+        return EXIT_FAILURE;
+    }
 
     /* Loop until the user closes the window */
     while(!glfwWindowShouldClose(window)){

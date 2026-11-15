@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.16)
 project(Renderer VERSION 1.0.0 LANGUAGES C CXX)
 
-set(CMAKE_MSVC_RUNTIME_LIBRARY MultiThreadedDLL)
+set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
 
 # Assimp Builds
 set(ASSIMP_BUILD_TESTS OFF CACHE BOOL "" FORCE)
@@ -31,7 +31,7 @@ target_link_libraries(Renderer PRIVATE shell32)
 target_link_libraries(Renderer PRIVATE opengl32)
 target_link_libraries(Renderer PRIVATE assimp::assimp)
 
-set_property(TARGET Renderer PROPERTY MSVC_RUNTIME_LIBRARY MultiThreadedDLL)
+# set_property(TARGET Renderer PROPERTY MSVC_RUNTIME_LIBRARY MultiThreadedDLL)
 
 target_compile_features(Renderer PRIVATE cxx_std_17)
 target_compile_definitions(Renderer PRIVATE PROJECT_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}")
