@@ -1,9 +1,10 @@
 #pragma once
 
+#include "mesh_data.hpp"
 #include <string>
 
 class ModelLoader
 {
 public:
-    bool inspect(const std::string& path);
+    bool loadMeshData(const std::string& path, std::vector<MeshData>& outMeshes);
 };

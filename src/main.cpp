@@ -10,6 +10,7 @@
 
 // Model Loader
 #include "model_loader.hpp"
+#include "mesh_data.hpp"
 
 const int WINDOW_WIDTH = 1920;
 const int WINDOW_HEIGHT = 1080;
@@ -128,12 +129,16 @@ int main(int argc, char const *argv[])
 
     /* KNZ : Load the Model */
     ModelLoader modelLoader;
+    std::vector<MeshData> forest_data;
 
     const std::string modelPath = std::string(PROJECT_SOURCE_DIR) + "/data/models/forest.FBX";
 
-    if (!modelLoader.inspect(modelPath)) {
+    if (!modelLoader.loadMeshData(modelPath, forest_data)) {
+        std::cerr << "[ERROR] Mesh data can't be loaded" << "\n";
         return EXIT_FAILURE;
     }
+
+    std::cout << "[INFO] Mesh data successfully loaded" << "\n";
 
     /* Loop until the user closes the window */
     while(!glfwWindowShouldClose(window)){
