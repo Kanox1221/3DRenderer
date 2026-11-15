@@ -4,16 +4,18 @@
 #include "readShaderFile.hpp"
 #include "assert.h"
 #include "camera_system.hpp"
+#include "mesh_data.hpp"
 
 class RenderSystem
 {
 public:
-    bool init(GLFWwindow *window);
+    bool init(GLFWwindow *window, const std::vector<MeshData>& meshes);
 
     /* Setup helper functions */
     void setupShaders();
     void setupGround();
     void setupCube();
+    void setupMesh(const MeshData& mesh);
 
     void draw(glm::mat4 view);
     void shutdown();
@@ -27,6 +29,11 @@ private:
     GLuint groundVAO_ = 0;
     GLuint groundVBO_ = 0;
     GLuint groundEBO_ = 0;
+
+    GLuint meshVAO_ = 0;
+    GLuint meshVBO_ = 0;
+    GLuint meshEBO_ = 0;
+    uint32_t numIndices_ = 0;
 
     GLint objectColorLoc_ = 0;
 

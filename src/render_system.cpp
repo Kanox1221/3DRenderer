@@ -1,6 +1,7 @@
 #include "render_system.hpp"
+#include <cstddef>
 
-bool RenderSystem::init(GLFWwindow* window)
+bool RenderSystem::init(GLFWwindow *window, const std::vector<MeshData>& meshes)
 {
     // ======================================================================
     // =========================== Depth Test ===============================
@@ -8,10 +9,17 @@ bool RenderSystem::init(GLFWwindow* window)
     glEnable(GL_DEPTH_TEST);
 
     // ======================================================================
-    // ========== VBO & VAO & EBO setup for both cube and Ground ============
+    // ======================= VBO & VAO & EBO setup ========================
     // ======================================================================
     setupCube();
     setupGround();
+    
+    for (unsigned int i = 0; i < meshes.size(); i++){
+        const MeshData& mesh = meshes.at(i);
+        setupMesh(mesh);
+    }
+
+    std::cout << "[INFO] VBO & VAO & EBO Setup Done" << "\n";
 
     // ======================================================================
     // =============================== Shader ===============================
@@ -250,6 +258,48 @@ void RenderSystem::setupCube()
     glBindVertexArray(0);
 }
 
+void RenderSystem::setupMesh(const MeshData &mesh)
+{
+    /* KNX : Create VBO */
+    glGenBuffers(1, &meshVBO_);
+
+    /* KNX : Set given VBO as GL_ARRAY_BUFFER */
+    glBindBuffer(GL_ARRAY_BUFFER, meshVBO_); // GL_ARRAY_BUFFER = Buffer that stores vertex
+
+    /* KNX : Copy the vertex data to buffer's memory */
+    GLsizeiptr mesh_vertex_size = mesh.vertices.size() * sizeof(VertexData);
+    glBufferData(GL_ARRAY_BUFFER, mesh_vertex_size, mesh.vertices.data(), GL_STATIC_DRAW);
+
+    /* KNX : Create VAO */
+    glGenVertexArrays(1, &meshVAO_);
+    glBindVertexArray(meshVAO_);
+
+    /* KNX : VAO setting */
+    unsigned int stride = sizeof(VertexData);
+    // Location = 0 / # of vertices / Type of data / Data to be normalized / Stride / Offset
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride, (void *)offsetof(VertexData, position));
+    glEnableVertexAttribArray(0);
+
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, stride, (void *)offsetof(VertexData, normal));
+    glEnableVertexAttribArray(1);
+
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, stride, (void *)offsetof(VertexData, uv));
+    glEnableVertexAttribArray(2);
+
+    /* KNX : Create EBO */
+    glGenBuffers(1, &meshEBO_);
+
+    /* KNX : Set EBO as GL_ELEMENT_ARRAY_BUFFER */
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, meshEBO_);
+
+    /* KNX : Copy the indices data to buffer's memory */
+    GLsizeiptr mesh_index_size = mesh.indices.size() * sizeof(unsigned int);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, mesh_index_size, mesh.indices.data(), GL_STATIC_DRAW);
+
+    /* KNX : Store Number of Indices */
+    numIndices_ = mesh.indices.size();
+}
+
 void RenderSystem::draw(glm::mat4 view)
 {
     /* Render here */
@@ -290,6 +340,10 @@ void RenderSystem::shutdown()
     groundVBO_ = 0;
     groundEBO_ = 0;
     groundVAO_ = 0;
+
+    meshVAO_ = 0;
+    meshVBO_ = 0;
+    meshEBO_ = 0;
 
     shaderProgram_ = 0;
 }

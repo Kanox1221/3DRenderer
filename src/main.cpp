@@ -105,6 +105,17 @@ int main(int argc, char const *argv[])
     /* Make the window's context current */
     glfwMakeContextCurrent(window);
 
+    /* KNZ : Load the Model */
+    ModelLoader modelLoader;
+    std::vector<MeshData> forest_meshes_data;
+
+    const std::string modelPath = std::string(PROJECT_SOURCE_DIR) + "/data/models/forest.FBX";
+
+    if (!modelLoader.loadMeshData(modelPath, forest_meshes_data)) {
+        std::cerr << "[ERROR] Mesh data can't be loaded" << "\n";
+        return EXIT_FAILURE;
+    }
+
     /* Load OpenGL functions through GLAD*/
 	if (!gladLoadGLLoader((GLADloadproc) glfwGetProcAddress)) {
         glfwTerminate();
@@ -119,24 +130,13 @@ int main(int argc, char const *argv[])
     glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
 
     /* KNX : Init the renderer */
-    renderer.init(window);
+    renderer.init(window, forest_meshes_data);
 
     /* KNX : Get Time */
     double previousTime = glfwGetTime();
 
     /* KNX : Remember the previous position */
     MouseState mouseState;
-
-    /* KNZ : Load the Model */
-    ModelLoader modelLoader;
-    std::vector<MeshData> forest_data;
-
-    const std::string modelPath = std::string(PROJECT_SOURCE_DIR) + "/data/models/forest.FBX";
-
-    if (!modelLoader.loadMeshData(modelPath, forest_data)) {
-        std::cerr << "[ERROR] Mesh data can't be loaded" << "\n";
-        return EXIT_FAILURE;
-    }
 
     std::cout << "[INFO] Mesh data successfully loaded" << "\n";
 
