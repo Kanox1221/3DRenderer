@@ -61,14 +61,24 @@ CameraMouseInput processMouseInput(GLFWwindow* window, MouseState& state)
 
     CameraMouseInput input{};
 
-    if (state.initialized) {
+    if(glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) != GLFW_PRESS){
+        // Left Click is not pressed
+        state.initialized = false;
+        return input;
+    } 
+
+    if (!state.initialized){
+        // Left Click is pressed but not initialized
+        state.initialized = true;
+    } else {
+        // Left Click is pressed and was initialized
         input.deltaX = x - state.lastX;
         input.deltaY = y - state.lastY;
     }
 
+    // Always update last x and y
     state.lastX = x;
     state.lastY = y;
-    state.initialized = true;
 
     return input;
 };
