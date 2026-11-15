@@ -38,6 +38,9 @@ bool ModelLoader::loadMeshData(const std::string& path, std::vector<MeshData>& o
         const aiMesh* mesh = scene->mMeshes[i];
 
         MeshData mesh_data;
+
+        glm::vec3 minPos(0.f, 0.f, 0.f);
+        glm::vec3 maxPos(0.f, 0.f, 0.f);
         
         for (unsigned int j = 0; j < mesh->mNumVertices; ++j){
             const aiVector3D& position = mesh->mVertices[j];
@@ -50,7 +53,21 @@ bool ModelLoader::loadMeshData(const std::string& path, std::vector<MeshData>& o
             v_data.uv = glm::vec2(uv.x, uv.y);
 
             mesh_data.vertices.push_back(v_data);
+
+            minPos = glm::min(minPos, v_data.position);
+            maxPos = glm::max(maxPos, v_data.position);
         }
+
+        // Check bounding box of model
+        glm::vec3 size = maxPos - minPos;
+        glm::vec3 center = (minPos + maxPos) * 0.5f;
+
+        std::cout << "Mesh " << i
+          << " | Min: (" << minPos.x << ", " << minPos.y << ", " << minPos.z << ")"
+          << " | Max: (" << maxPos.x << ", " << maxPos.y << ", " << maxPos.z << ")"
+          << " | Size: (" << size.x << ", " << size.y << ", " << size.z << ")"
+          << " | Center: (" << center.x << ", " << center.y << ", " << center.z << ")"
+          << '\n';
 
         for (unsigned int j = 0; j < mesh->mNumFaces; ++j){
             const aiFace& face = mesh->mFaces[j];
