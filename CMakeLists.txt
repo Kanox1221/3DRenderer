@@ -1,6 +1,15 @@
 cmake_minimum_required(VERSION 3.16)
 project(Renderer VERSION 1.0.0 LANGUAGES C CXX)
 
+set(CMAKE_MSVC_RUNTIME_LIBRARY MultiThreadedDLL)
+
+# Assimp Builds
+set(ASSIMP_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+set(ASSIMP_INSTALL OFF CACHE BOOL "" FORCE)
+set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
+
+add_subdirectory(external/assimp)
+
 find_package(OpenGL REQUIRED)
 # find_package(glfw REQUIRED)
 
@@ -20,6 +29,7 @@ target_link_libraries(Renderer PRIVATE user32)
 target_link_libraries(Renderer PRIVATE gdi32)
 target_link_libraries(Renderer PRIVATE shell32)
 target_link_libraries(Renderer PRIVATE opengl32)
+target_link_libraries(Renderer PRIVATE assimp::assimp)
 
 set_property(TARGET Renderer PROPERTY MSVC_RUNTIME_LIBRARY MultiThreadedDLL)
 
