@@ -300,6 +300,8 @@ void RenderSystem::setupMesh(const MeshData &mesh)
 
     /* KNX : Store Number of Indices */
     numIndices_ = mesh.indices.size();
+
+    glBindVertexArray(0);
 }
 
 void RenderSystem::draw(glm::mat4 view)
@@ -339,6 +341,11 @@ void RenderSystem::shutdown()
     glDeleteBuffers(1, &groundVBO_);
     glDeleteBuffers(1, &groundEBO_);
     glDeleteVertexArrays(1, &groundVAO_);
+
+    glDeleteBuffers(1, &meshVAO_);
+    glDeleteBuffers(1, &meshVBO_);
+    glDeleteVertexArrays(1, &meshEBO_);
+
     glDeleteProgram(shaderProgram_);
 
     cubeVBO_ = 0;
