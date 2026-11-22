@@ -12,6 +12,9 @@ uniform bool useTexture;
 in vec3 WorldNormal;
 uniform bool showNormal;
 
+uniform vec3 lightDirection;
+uniform bool useDiffuse;
+
 void main()
 {
     if (showUV) {
@@ -30,11 +33,21 @@ void main()
             FragColor = vec4(N * 0.5 + 0.5, 1.0);
         } else {
             float ambientStrength = 0.5;
-            vec3 lightColor = vec3(1.0);  // White color
+            float diffuseStrength = 0.8;
+            vec3 lightColor = vec3(1.0);
 
             vec3 ambient = ambientStrength * lightColor;
-            vec3 result = ambient * texel.rgb;
+            vec3 diffuse = vec3(0.0);
 
+            if (useDiffuse) {
+                vec3 N = normalize(WorldNormal);
+                vec3 L = normalize(-lightDirection);        // L : Face to light source / lightDirection : Light Source to Face
+
+                float amount = max(dot(N, L), 0.0);
+                diffuse = diffuseStrength * amount * lightColor;
+            }
+
+            vec3 result = (ambient + diffuse) * texel.rgb;
             FragColor = vec4(result, 1.0);
         }
     }

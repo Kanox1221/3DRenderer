@@ -23,6 +23,7 @@ public:
     void draw(glm::mat4 view);
     void shutdown();
 private:
+    // Shader Program / VAO / VBO / EBO
     GLuint shaderProgram_ = 0;
 
     GLuint cubeVAO_ = 0;
@@ -38,13 +39,20 @@ private:
     GLuint meshEBO_ = 0;
     uint32_t numIndices_ = 0;
 
+    // Color & Textures
     GLuint grassTexture_ = 0;
     GLuint forestTexture_ = 0;
-
     GLint objectColorLoc_ = -1;
+
+    // Flags
     GLint showUVLoc_ = -1;
     GLint useTextureLoc_ = -1;
     GLint showNormalLoc_ = -1;
+    GLint useDiffuseLoc_ = -1;
+
+    // Lighting
+    glm::vec3 lightDirection_ = glm::vec3(-1.0f, -1.0f, -0.5f);
+    GLint lightDirectionLoc_ = -1;
 
     GLint modelLoc_ = -1;
     GLint viewLoc_ = -1;

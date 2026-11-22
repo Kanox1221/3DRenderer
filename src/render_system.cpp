@@ -29,12 +29,15 @@ bool RenderSystem::init(GLFWwindow *window, const std::vector<MeshData>& meshes)
     setupGrassTexture();
     setupForestTexture();
 
-    /* KNX : Get location for objectColor & showUV */
+    /* KNX : Get locations */
     objectColorLoc_ = glGetUniformLocation(shaderProgram_, "ObjectColor");
     showUVLoc_ = glGetUniformLocation(shaderProgram_, "showUV");
     useTextureLoc_ = glGetUniformLocation(shaderProgram_, "useTexture");
     GLint textureLoc = glGetUniformLocation(shaderProgram_, "ourTexture");
     showNormalLoc_ = glGetUniformLocation(shaderProgram_, "showNormal");
+
+    lightDirectionLoc_ =glGetUniformLocation(shaderProgram_, "lightDirection");
+    useDiffuseLoc_ = glGetUniformLocation(shaderProgram_, "useDiffuse");
 
     glUniform1i(textureLoc, 0);
 
@@ -404,6 +407,7 @@ void RenderSystem::draw(glm::mat4 view)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glUniformMatrix4fv(viewLoc_, 1, GL_FALSE, glm::value_ptr(view));
+    glUniform3fv(lightDirectionLoc_, 1, glm::value_ptr(lightDirection_));
 
     /* KNX : Draw Cube */
     glUniformMatrix4fv(modelLoc_, 1, GL_FALSE, glm::value_ptr(models_[0]));
@@ -411,6 +415,7 @@ void RenderSystem::draw(glm::mat4 view)
     glUniform1i(useTextureLoc_, 0); 
     glUniform1i(showUVLoc_, 0);
     glUniform1i(showNormalLoc_, 0);
+    glUniform1i(useDiffuseLoc_, 1);   
     glBindVertexArray(cubeVAO_);
     glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, (void*) 0);
     // glDrawArrays(GL_TRIANGLES, 0, 3);
@@ -419,6 +424,7 @@ void RenderSystem::draw(glm::mat4 view)
     glUniformMatrix4fv(modelLoc_, 1, GL_FALSE, glm::value_ptr(models_[1]));
     // glUniform3f(objectColorLoc_, 0.4f, 0.4f, 0.4f);     // Color ground as grey
     glUniform1i(useTextureLoc_, 1);                     // Use grass texture for floor
+    glUniform1i(useDiffuseLoc_, 0);   
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, grassTexture_);   
     glBindVertexArray(groundVAO_);
@@ -429,7 +435,8 @@ void RenderSystem::draw(glm::mat4 view)
     glUniform3f(objectColorLoc_, 0.6f, 0.9f, 0.4f);     // Color forest model as green
     glUniform1i(useTextureLoc_, 1);
     glUniform1i(showUVLoc_, 0);  
-    glUniform1i(showNormalLoc_, 0);                       
+    glUniform1i(showNormalLoc_, 0);   
+    glUniform1i(useDiffuseLoc_, 1);   
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, forestTexture_);
     glBindVertexArray(meshVAO_);
