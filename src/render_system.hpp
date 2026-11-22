@@ -44,6 +44,7 @@ private:
     GLint objectColorLoc_ = -1;
     GLint showUVLoc_ = -1;
     GLint useTextureLoc_ = -1;
+    GLint showNormalLoc_ = -1;
 
     GLint modelLoc_ = -1;
     GLint viewLoc_ = -1;

@@ -9,6 +9,9 @@ uniform sampler2D ourTexture;
 uniform bool showUV;
 uniform bool useTexture;
 
+in vec3 WorldNormal;
+uniform bool showNormal;
+
 void main()
 {
     if (showUV) {
@@ -22,7 +25,12 @@ void main()
             discard;
         }
 
-        FragColor = vec4(texel.rgb, 1.0);
+        if (showNormal) {
+            vec3 N = normalize(WorldNormal);
+            FragColor = vec4(N * 0.5 + 0.5, 1.0);
+        } else {
+            FragColor = vec4(texel.rgb, 1.0);
+        }
     }
     else {
         FragColor = vec4(ObjectColor, 1.0);

@@ -34,6 +34,7 @@ bool RenderSystem::init(GLFWwindow *window, const std::vector<MeshData>& meshes)
     showUVLoc_ = glGetUniformLocation(shaderProgram_, "showUV");
     useTextureLoc_ = glGetUniformLocation(shaderProgram_, "useTexture");
     GLint textureLoc = glGetUniformLocation(shaderProgram_, "ourTexture");
+    showNormalLoc_ = glGetUniformLocation(shaderProgram_, "showNormal");
 
     glUniform1i(textureLoc, 0);
 
@@ -409,6 +410,7 @@ void RenderSystem::draw(glm::mat4 view)
     glUniform3f(objectColorLoc_, 1.0f, 0.5f, 0.0f);     // Color cube as orange
     glUniform1i(useTextureLoc_, 0); 
     glUniform1i(showUVLoc_, 0);
+    glUniform1i(showNormalLoc_, 0);
     glBindVertexArray(cubeVAO_);
     glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, (void*) 0);
     // glDrawArrays(GL_TRIANGLES, 0, 3);
@@ -426,11 +428,16 @@ void RenderSystem::draw(glm::mat4 view)
     glUniformMatrix4fv(modelLoc_, 1, GL_FALSE, glm::value_ptr(models_[2]));
     glUniform3f(objectColorLoc_, 0.6f, 0.9f, 0.4f);     // Color forest model as green
     glUniform1i(useTextureLoc_, 1);
-    glUniform1i(showUVLoc_, 0);                         
+    glUniform1i(showUVLoc_, 0);  
+    glUniform1i(showNormalLoc_, 1);                       
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, forestTexture_);
     glBindVertexArray(meshVAO_);
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+    glFrontFace(GL_CCW);
     glDrawElements(GL_TRIANGLES, numIndices_, GL_UNSIGNED_INT, (void*) 0);
+    glDisable(GL_CULL_FACE);
 }
 
 void RenderSystem::shutdown()
