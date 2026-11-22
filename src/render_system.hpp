@@ -5,6 +5,7 @@
 #include "assert.h"
 #include "camera_system.hpp"
 #include "mesh_data.hpp"
+#include "stb_image/stb_image.h"
 
 class RenderSystem
 {
@@ -35,8 +36,11 @@ private:
     GLuint meshEBO_ = 0;
     uint32_t numIndices_ = 0;
 
-    GLint objectColorLoc_ = 0;
+    GLuint grassTexture_ = 0;
+
+    GLint objectColorLoc_ = -1;
     GLint showUVLoc_ = -1;
+    GLint useTextureLoc_ = -1;
 
     GLint modelLoc_ = -1;
     GLint viewLoc_ = -1;

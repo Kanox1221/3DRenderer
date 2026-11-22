@@ -22,13 +22,45 @@ bool RenderSystem::init(GLFWwindow *window, const std::vector<MeshData>& meshes)
     std::cout << "[INFO] VBO & VAO & EBO Setup Done" << "\n";
 
     // ======================================================================
-    // =============================== Shader ===============================
+    // ========================= Shader & Textures ==========================
     // ======================================================================
     setupShaders();
+
+    glGenTextures(1, &grassTexture_);
+    glBindTexture(GL_TEXTURE_2D, grassTexture_);
+
+    /* KNX : Set texture wrapping, filtering options */
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    /* KNX : Load Image Texture */
+    int tex_width, tex_height, nrChannels;
+    std::string texturePath = std::string(PROJECT_SOURCE_DIR) + "/assets/textures/grass-texture.png";
+    unsigned char *tex_data = stbi_load(texturePath.c_str(), &tex_width, &tex_height, &nrChannels, STBI_rgb); 
+
+    if (tex_data){
+        /* KNX :
+        Generate Texture:Texture Target, Mipmap Level, Format of storing texture,
+                         Texture width, Texture height, 0 (Legacy),
+                         Texture Format Type, Texture Data Type, Texture Data */
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, tex_width, tex_height,
+            0, GL_RGB, GL_UNSIGNED_BYTE, tex_data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+
+        std::cout << "[INFO] Grass Texture Load Successfully" << std::endl;
+    } else {
+        std::cerr << "[ERROR] Grass Texture Load Error" << std::endl;
+        std::cout << "Texture Load Info : " << stbi_failure_reason() << std::endl;
+    }
+
+    stbi_image_free(tex_data);
 
     /* KNX : Get location for objectColor & showUV */
     objectColorLoc_ = glGetUniformLocation(shaderProgram_, "ObjectColor");
     showUVLoc_ = glGetUniformLocation(shaderProgram_, "showUV");
+    useTextureLoc_ = glGetUniformLocation(shaderProgram_, "useTexture");
 
     // ======================================================================
     // ===================== Model & View & Projection ======================
@@ -155,10 +187,10 @@ void RenderSystem::setupShaders()
 void RenderSystem::setupGround()
 {
     float ground_vertices[] = {
-        -1.0f, -1.0f, -1.0f,
-        1.0f, -1.0f, -1.0f,
-        1.0f, -1.0f,  1.0f,
-        -1.0f, -1.0f,  1.0f,
+        -1.0f, -1.0f, -1.0f,    0.0f, 0.0f,
+         1.0f, -1.0f, -1.0f,    1.0f, 0.0f,
+         1.0f, -1.0f,  1.0f,    1.0f, 1.0f,
+        -1.0f, -1.0f,  1.0f,    0.0f, 1.0f,
     };
 
     uint32_t ground_indices[] = {
@@ -178,11 +210,17 @@ void RenderSystem::setupGround()
     glBindBuffer(GL_ARRAY_BUFFER, groundVBO_);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, groundEBO_);
 
-    uint32_t stride = 3 * sizeof(float);
+    uint32_t stride = (3 + 2) * sizeof(float);
     glBufferData(GL_ARRAY_BUFFER, sizeof(ground_vertices), ground_vertices, GL_STATIC_DRAW);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(ground_indices), ground_indices, GL_STATIC_DRAW);
+    
+    /* KNX : Read Vertex Coordinate */
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride, (void *)0);
     glEnableVertexAttribArray(0);
+
+    /* KNX : Read Texture Coordinate */
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, stride, (void *)(3 * sizeof(float)));
+    glEnableVertexAttribArray(2);
 
     // Deselect VAO
     glBindVertexArray(0);
@@ -315,22 +353,25 @@ void RenderSystem::draw(glm::mat4 view)
 
     /* KNX : Draw Cube */
     glUniformMatrix4fv(modelLoc_, 1, GL_FALSE, glm::value_ptr(models_[0]));
-    glUniform1i(showUVLoc_, 0);
     glUniform3f(objectColorLoc_, 1.0f, 0.5f, 0.0f);     // Color cube as orange
+    glUniform1i(useTextureLoc_, 0); 
+    glUniform1i(showUVLoc_, 0);
     glBindVertexArray(cubeVAO_);
     glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, (void*) 0);
     // glDrawArrays(GL_TRIANGLES, 0, 3);
 
     /* KNX : Draw Floor */
     glUniformMatrix4fv(modelLoc_, 1, GL_FALSE, glm::value_ptr(models_[1]));
-    glUniform3f(objectColorLoc_, 0.4f, 0.4f, 0.4f);     // Color ground as grey
+    // glUniform3f(objectColorLoc_, 0.4f, 0.4f, 0.4f);     // Color ground as grey
+    glUniform1i(useTextureLoc_, 1);                     // Use grass texture for floor
     glBindVertexArray(groundVAO_);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (void*) 0);
 
     /* KNX : Draw Forest Model */
     glUniformMatrix4fv(modelLoc_, 1, GL_FALSE, glm::value_ptr(models_[2]));
     glUniform3f(objectColorLoc_, 0.6f, 0.9f, 0.4f);     // Color forest model as green
-    glUniform1i(showUVLoc_, 1);
+    glUniform1i(useTextureLoc_, 0);
+    glUniform1i(showUVLoc_, 1);                         // Show UV for forest model
     glBindVertexArray(meshVAO_);
     glDrawElements(GL_TRIANGLES, numIndices_, GL_UNSIGNED_INT, (void*) 0);
 }
@@ -349,6 +390,8 @@ void RenderSystem::shutdown()
     glDeleteBuffers(1, &meshEBO_);
     glDeleteVertexArrays(1, &meshVAO_);
 
+    glDeleteTextures(1, &grassTexture_);
+
     glDeleteProgram(shaderProgram_);
 
     cubeVBO_ = 0;
@@ -362,6 +405,8 @@ void RenderSystem::shutdown()
     meshVAO_ = 0;
     meshVBO_ = 0;
     meshEBO_ = 0;
+
+    grassTexture_ = 0;
 
     shaderProgram_ = 0;
 }
