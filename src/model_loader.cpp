@@ -7,6 +7,56 @@
 #include <iostream>
 #include <utility>
 
+void printTextureInfo(const aiScene* scene)
+{
+    if (scene == nullptr) {
+        return;
+    }
+
+    for (unsigned int m = 0; m < scene->mNumMaterials; ++m) {
+        const aiMaterial* material = scene->mMaterials[m];
+        bool hasTexture = false;
+
+        std::cout << "Material " << m << '\n';
+
+        // NONE(0) is not actual texture type
+        for (int value = 1; value <= AI_TEXTURE_TYPE_MAX; ++value) {
+            const auto type = static_cast<aiTextureType>(value);
+            const unsigned int count = material->GetTextureCount(type);
+
+            for (unsigned int t = 0; t < count; ++t) {
+                aiString path;
+                unsigned int uvChannel = 0;
+                aiTextureMapping mapping = aiTextureMapping_UV;
+
+                if (material->GetTexture(type, t, &path, &mapping, &uvChannel)
+                    != AI_SUCCESS) {
+                    std::cout << "  [ERROR] Failed to read texture\n";
+                    continue;
+                }
+
+                hasTexture = true;
+
+                std::cout << "  Type: " << aiTextureTypeToString(type)
+                          << " | Slot: " << t
+                          << " | Path: " << path.C_Str();
+
+                if (mapping == aiTextureMapping_UV) {
+                    std::cout << " | UV channel: " << uvChannel;
+                } else {
+                    std::cout << " | UV channel: N/A (non-UV mapping)";
+                }
+
+                std::cout << '\n';
+            }
+        }
+
+        if (!hasTexture) {
+            std::cout << "  No texture entries read\n";
+        }
+    }
+}
+
 
 void printNodeInfo(const aiNode* node, unsigned int depth = 0)
 {
@@ -96,6 +146,23 @@ void processNode(const aiNode* node, const aiScene* scene, const aiMatrix4x4& pa
                 vertex.uv = glm::vec2(uv.x, uv.y);
             }
 
+            // For every mesh, check first 5 uv vertex
+            if (j < 5) {
+                std::cout << "Mesh " << meshIndex
+                        << " | Vertex " << j
+                        << " | Has UV0: " << mesh->HasTextureCoords(0)
+                        << " | UV: (" << vertex.uv.x
+                        << ", " << vertex.uv.y << ")\n";
+            }
+
+            if (j < 5) {
+                std::cout << "Mesh " << meshIndex
+                        << " | Vertex " << j
+                        << " | Has UV1: " << mesh->HasTextureCoords(1)
+                        << " | UV: (" << mesh->mTextureCoords[1][j].x
+                        << ", " << mesh->mTextureCoords[1][j].y << ")\n";
+            }
+
             meshData.vertices.push_back(vertex);
         }
 
@@ -159,6 +226,7 @@ bool ModelLoader::loadMeshData(const std::string& path, std::vector<MeshData>& o
                   << " | Faces: " << mesh->mNumFaces
                   << " | Normals: " << mesh->HasNormals()
                   << " | UV0: " << mesh->HasTextureCoords(0)
+                  << " | UV Channels: " << mesh->GetNumUVChannels()
                   << '\n';
     }
 
@@ -182,8 +250,11 @@ bool ModelLoader::loadMeshData(const std::string& path, std::vector<MeshData>& o
 
     // Print Node Transform Data
     std::cout << "[INFO] =========== Node Transform Data ===========" << "\n";
-
     printNodeInfo(scene->mRootNode);
+
+    // Print Texture Data
+    std::cout << "[INFO] =========== Texture Data ===========\n";
+    printTextureInfo(scene);
 
     return true;
 }

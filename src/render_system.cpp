@@ -342,9 +342,9 @@ void RenderSystem::shutdown()
     glDeleteBuffers(1, &groundEBO_);
     glDeleteVertexArrays(1, &groundVAO_);
 
-    glDeleteBuffers(1, &meshVAO_);
     glDeleteBuffers(1, &meshVBO_);
-    glDeleteVertexArrays(1, &meshEBO_);
+    glDeleteBuffers(1, &meshEBO_);
+    glDeleteVertexArrays(1, &meshVAO_);
 
     glDeleteProgram(shaderProgram_);
 
