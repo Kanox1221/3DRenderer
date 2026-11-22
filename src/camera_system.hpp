@@ -18,7 +18,7 @@ class CameraSystem
         // Rotation
         float yaw_ = -90.0f;
         float pitch_ = 0.0f;
-        float movementSpeed_ = 2.5f;
+        float movementSpeed_ = 5.5f;
         float mouseSensitivity_ = 0.1f;
 
         glm::mat4 view_ = glm::lookAt(position_, position_ + front_, up_);

@@ -36,6 +36,7 @@ private:
     uint32_t numIndices_ = 0;
 
     GLint objectColorLoc_ = 0;
+    GLint showUVLoc_ = -1;
 
     GLint modelLoc_ = -1;
     GLint viewLoc_ = -1;

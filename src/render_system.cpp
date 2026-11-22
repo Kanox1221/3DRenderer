@@ -26,8 +26,9 @@ bool RenderSystem::init(GLFWwindow *window, const std::vector<MeshData>& meshes)
     // ======================================================================
     setupShaders();
 
-    /* KNX : Get location for objectColor */
+    /* KNX : Get location for objectColor & showUV */
     objectColorLoc_ = glGetUniformLocation(shaderProgram_, "ObjectColor");
+    showUVLoc_ = glGetUniformLocation(shaderProgram_, "showUV");
 
     // ======================================================================
     // ===================== Model & View & Projection ======================
@@ -69,7 +70,7 @@ bool RenderSystem::init(GLFWwindow *window, const std::vector<MeshData>& meshes)
 void RenderSystem::setupShaders()
 {
     /* KNX : Read our vertex shader file */
-    std::string vertexShaderSource = readShaderFile(std::string(PROJECT_SOURCE_DIR) + "/shaders/triangle.vs.glsl");
+    std::string vertexShaderSource = readShaderFile(std::string(PROJECT_SOURCE_DIR) + "/shaders/basic.vs.glsl");
     const char *vertexShaderSource_c = vertexShaderSource.c_str();
 
     /* KNX : Create and compile vertex shader*/
@@ -96,7 +97,7 @@ void RenderSystem::setupShaders()
     }
 
     /* KNX : Repeat same thing for fragment shader */
-    std::string fragmentShaderSource = readShaderFile(std::string(PROJECT_SOURCE_DIR) + "/shaders/triangle.fs.glsl");
+    std::string fragmentShaderSource = readShaderFile(std::string(PROJECT_SOURCE_DIR) + "/shaders/basic.fs.glsl");
     const char *fragmentShaderSource_c = fragmentShaderSource.c_str();
 
     unsigned int fragmentShader;
@@ -314,6 +315,7 @@ void RenderSystem::draw(glm::mat4 view)
 
     /* KNX : Draw Cube */
     glUniformMatrix4fv(modelLoc_, 1, GL_FALSE, glm::value_ptr(models_[0]));
+    glUniform1i(showUVLoc_, 0);
     glUniform3f(objectColorLoc_, 1.0f, 0.5f, 0.0f);     // Color cube as orange
     glBindVertexArray(cubeVAO_);
     glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, (void*) 0);
@@ -328,6 +330,7 @@ void RenderSystem::draw(glm::mat4 view)
     /* KNX : Draw Forest Model */
     glUniformMatrix4fv(modelLoc_, 1, GL_FALSE, glm::value_ptr(models_[2]));
     glUniform3f(objectColorLoc_, 0.6f, 0.9f, 0.4f);     // Color forest model as green
+    glUniform1i(showUVLoc_, 1);
     glBindVertexArray(meshVAO_);
     glDrawElements(GL_TRIANGLES, numIndices_, GL_UNSIGNED_INT, (void*) 0);
 }
