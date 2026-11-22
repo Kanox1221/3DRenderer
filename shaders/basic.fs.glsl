@@ -29,7 +29,13 @@ void main()
             vec3 N = normalize(WorldNormal);
             FragColor = vec4(N * 0.5 + 0.5, 1.0);
         } else {
-            FragColor = vec4(texel.rgb, 1.0);
+            float ambientStrength = 0.5;
+            vec3 lightColor = vec3(1.0);  // White color
+
+            vec3 ambient = ambientStrength * lightColor;
+            vec3 result = ambient * texel.rgb;
+
+            FragColor = vec4(result, 1.0);
         }
     }
     else {

@@ -429,7 +429,7 @@ void RenderSystem::draw(glm::mat4 view)
     glUniform3f(objectColorLoc_, 0.6f, 0.9f, 0.4f);     // Color forest model as green
     glUniform1i(useTextureLoc_, 1);
     glUniform1i(showUVLoc_, 0);  
-    glUniform1i(showNormalLoc_, 1);                       
+    glUniform1i(showNormalLoc_, 0);                       
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, forestTexture_);
     glBindVertexArray(meshVAO_);
