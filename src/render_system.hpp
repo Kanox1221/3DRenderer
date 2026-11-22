@@ -10,13 +10,15 @@
 class RenderSystem
 {
 public:
-    bool init(GLFWwindow *window, const std::vector<MeshData>& meshes);
+    bool init(GLFWwindow *window, const std::vector<MeshData> &meshes);
 
     /* Setup helper functions */
     void setupShaders();
     void setupGround();
     void setupCube();
     void setupMesh(const MeshData& mesh);
+    void setupGrassTexture();
+    void setupForestTexture();
 
     void draw(glm::mat4 view);
     void shutdown();
@@ -37,6 +39,7 @@ private:
     uint32_t numIndices_ = 0;
 
     GLuint grassTexture_ = 0;
+    GLuint forestTexture_ = 0;
 
     GLint objectColorLoc_ = -1;
     GLint showUVLoc_ = -1;

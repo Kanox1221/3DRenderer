@@ -26,41 +26,16 @@ bool RenderSystem::init(GLFWwindow *window, const std::vector<MeshData>& meshes)
     // ======================================================================
     setupShaders();
 
-    glGenTextures(1, &grassTexture_);
-    glBindTexture(GL_TEXTURE_2D, grassTexture_);
-
-    /* KNX : Set texture wrapping, filtering options */
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-    /* KNX : Load Image Texture */
-    int tex_width, tex_height, nrChannels;
-    std::string texturePath = std::string(PROJECT_SOURCE_DIR) + "/assets/textures/grass-texture.png";
-    unsigned char *tex_data = stbi_load(texturePath.c_str(), &tex_width, &tex_height, &nrChannels, STBI_rgb); 
-
-    if (tex_data){
-        /* KNX :
-        Generate Texture:Texture Target, Mipmap Level, Format of storing texture,
-                         Texture width, Texture height, 0 (Legacy),
-                         Texture Format Type, Texture Data Type, Texture Data */
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, tex_width, tex_height,
-            0, GL_RGB, GL_UNSIGNED_BYTE, tex_data);
-        glGenerateMipmap(GL_TEXTURE_2D);
-
-        std::cout << "[INFO] Grass Texture Load Successfully" << std::endl;
-    } else {
-        std::cerr << "[ERROR] Grass Texture Load Error" << std::endl;
-        std::cout << "Texture Load Info : " << stbi_failure_reason() << std::endl;
-    }
-
-    stbi_image_free(tex_data);
+    setupGrassTexture();
+    setupForestTexture();
 
     /* KNX : Get location for objectColor & showUV */
     objectColorLoc_ = glGetUniformLocation(shaderProgram_, "ObjectColor");
     showUVLoc_ = glGetUniformLocation(shaderProgram_, "showUV");
     useTextureLoc_ = glGetUniformLocation(shaderProgram_, "useTexture");
+    GLint textureLoc = glGetUniformLocation(shaderProgram_, "ourTexture");
+
+    glUniform1i(textureLoc, 0);
 
     // ======================================================================
     // ===================== Model & View & Projection ======================
@@ -343,6 +318,84 @@ void RenderSystem::setupMesh(const MeshData &mesh)
     glBindVertexArray(0);
 }
 
+void RenderSystem::setupGrassTexture()
+{
+    /* KNX : Load Image Texture */
+    int tex_width, tex_height, nrChannels;
+    std::string texturePath = std::string(PROJECT_SOURCE_DIR) + "/assets/textures/grass-texture.png";
+    unsigned char *tex_data = stbi_load(texturePath.c_str(), &tex_width, &tex_height, &nrChannels, STBI_rgb);
+
+    if (tex_data)
+    {
+        glGenTextures(1, &grassTexture_);
+        glBindTexture(GL_TEXTURE_2D, grassTexture_);
+
+        /* KNX : Set texture wrapping, filtering options */
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+        /* KNX :
+        Generate Texture:Texture Target, Mipmap Level, Format of storing texture,
+                         Texture width, Texture height, 0 (Legacy),
+                         Texture Format Type, Texture Data Type, Texture Data */
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, tex_width, tex_height,
+                     0, GL_RGB, GL_UNSIGNED_BYTE, tex_data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+
+        std::cout << "[INFO] Grass Texture Load Successfully" << std::endl;
+    }
+    else
+    {
+        std::cerr << "[ERROR] Grass Texture Load Error" << std::endl;
+        std::cout << "Texture Load Info : " << stbi_failure_reason() << std::endl;
+    }
+
+    stbi_image_free(tex_data);
+}
+
+void RenderSystem::setupForestTexture()
+{
+    /* KNX : Load Image Texture */
+    int tex_width, tex_height, nrChannels;
+    std::string texturePath = std::string(PROJECT_SOURCE_DIR) + "/data/models/textures/forest-RGBA.png";
+    stbi_set_flip_vertically_on_load(true);
+    unsigned char *tex_data = stbi_load(texturePath.c_str(), &tex_width, &tex_height, &nrChannels, STBI_rgb_alpha); 
+    stbi_set_flip_vertically_on_load(false);
+
+    if (tex_data){
+        // std::cout << "[INFO] Forest RGBA Texture Load Successfully" << std::endl;
+        std::cout << "[INFO] Forest RGBA image loaded"
+          << " | Size: " << tex_width << " x " << tex_height
+          << " | Source channels: " << nrChannels
+          << " | Output channels: 4\n";
+
+        glActiveTexture(GL_TEXTURE0);
+
+        glGenTextures(1, &forestTexture_);
+        glBindTexture(GL_TEXTURE_2D, forestTexture_);
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,GL_LINEAR_MIPMAP_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+        /* KNX :
+        Generate Texture:Texture Target, Mipmap Level, Format of storing texture,
+                         Texture width, Texture height, 0 (Legacy),
+                         Texture Format Type, Texture Data Type, Texture Data */
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, tex_width, tex_height,
+            0, GL_RGBA, GL_UNSIGNED_BYTE, tex_data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+    } else {
+        std::cerr << "[ERROR] Forest RGBA Texture Load Error" << std::endl;
+        std::cout << "Texture Load Info : " << stbi_failure_reason() << std::endl;
+    }
+
+    stbi_image_free(tex_data);
+}
+
 void RenderSystem::draw(glm::mat4 view)
 {
     /* Render here */
@@ -364,14 +417,18 @@ void RenderSystem::draw(glm::mat4 view)
     glUniformMatrix4fv(modelLoc_, 1, GL_FALSE, glm::value_ptr(models_[1]));
     // glUniform3f(objectColorLoc_, 0.4f, 0.4f, 0.4f);     // Color ground as grey
     glUniform1i(useTextureLoc_, 1);                     // Use grass texture for floor
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, grassTexture_);   
     glBindVertexArray(groundVAO_);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (void*) 0);
 
     /* KNX : Draw Forest Model */
     glUniformMatrix4fv(modelLoc_, 1, GL_FALSE, glm::value_ptr(models_[2]));
     glUniform3f(objectColorLoc_, 0.6f, 0.9f, 0.4f);     // Color forest model as green
-    glUniform1i(useTextureLoc_, 0);
-    glUniform1i(showUVLoc_, 1);                         // Show UV for forest model
+    glUniform1i(useTextureLoc_, 1);
+    glUniform1i(showUVLoc_, 0);                         
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, forestTexture_);
     glBindVertexArray(meshVAO_);
     glDrawElements(GL_TRIANGLES, numIndices_, GL_UNSIGNED_INT, (void*) 0);
 }
@@ -391,6 +448,7 @@ void RenderSystem::shutdown()
     glDeleteVertexArrays(1, &meshVAO_);
 
     glDeleteTextures(1, &grassTexture_);
+    glDeleteTextures(1, &forestTexture_);
 
     glDeleteProgram(shaderProgram_);
 
@@ -407,6 +465,7 @@ void RenderSystem::shutdown()
     meshEBO_ = 0;
 
     grassTexture_ = 0;
+    forestTexture_ = 0;
 
     shaderProgram_ = 0;
 }
